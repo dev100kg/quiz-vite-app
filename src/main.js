@@ -54,7 +54,7 @@ async function initializeAppAndLoadQuiz() {
 
     appContainer.innerHTML = `
             <div class="container">
-                <p id="status-message">認証完了: ユーザーID ${currentUid.substring(0, 8)}...</p>
+                <p id="status-message">ユーザーID ${currentUid.substring(0, 8)}...</p>
                 <div id="quiz-container">
                     <p>クイズデータ準備中...</p>
                 </div>
