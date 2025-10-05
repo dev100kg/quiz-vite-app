@@ -1,0 +1,113 @@
+/* style.css */
+
+/*
+=========================================================
+モバイルファーストの初期設定 (全てのデバイスに適用される基本スタイル)
+=========================================================
+*/
+
+/* 基本フォントサイズを大きくし、モバイルでの視認性を向上 */
+body {
+    font-family: 'Noto Sans JP', 'Roboto', sans-serif; 
+    
+    padding: 10px; 
+    font-size: 1.6rem;
+    margin: 0;
+}
+
+/* Milligramのコンテナの最大幅を解除し、モバイルでは画面幅いっぱいに使う */
+.container {
+    width: 95% !important; 
+    max-width: 100% !important; 
+}
+
+/* タイトルを中央寄せ */
+h1 {
+    text-align: center;
+    font-size: 2.8rem;
+    margin-bottom: 10px;
+}
+
+/* === タップしやすいボタンと問題文 === */
+
+/* 問題文（question）を大きく目立たせる */
+#quiz-container h2 {
+    font-size: 2.4rem;
+    text-align: center;
+}
+#quiz-container p strong {
+    display: block;
+    font-size: 2rem; /* 問題文のサイズ */
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+/* ボタンをブロック要素（縦並び）にし、タップしやすい高さと全幅を設定 */
+.option-button {
+    display: block;
+    width: 100%; /* 全幅に広げる */
+    min-height: 55px; /* タップしやすい最低限の高さ */
+    padding: 15px 10px;
+    margin-bottom: 12px;
+    font-size: 1.1em;
+    line-height: 1;
+    white-space: normal; /* テキストの折り返しを許可 */
+}
+
+/* 正解/不正解のフィードバックを目立たせる */
+#feedback {
+    font-size: 2rem;
+    text-align: center;
+    margin: 20px 0;
+    padding: 10px;
+}
+
+/* ランキング/結果画面のボタンを全幅にする */
+#result-container button {
+    width: 100%;
+    margin-top: 20px;
+    min-height: 50px;
+}
+
+/* === ランキングテーブルの調整 === */
+table {
+    font-size: 1.4rem;
+    /* MilligramのテーブルはレスポンシブなのでこれだけでOK */
+}
+table th, table td {
+    padding: 10px 5px;
+    text-align: left;
+}
+/* スコアの列を太字で強調 */
+table td:nth-child(2) strong {
+    font-size: 1.1em;
+}
+
+/*
+=========================================================
+デスクトップ/タブレット向けの調整 (40.0rem = 640px以上)
+=========================================================
+*/
+@media (min-width: 40.0rem) {
+    /* コンテナ幅を制限し、中央に寄せることで間延びを防ぐ */
+    .container {
+        width: 80% !important; 
+        max-width: 96.0rem !important; /* 標準的なデスクトップの最大幅に設定 */
+    }
+    
+    /* ボタンをインライン要素に戻し、横に並べる */
+    .option-button {
+        display: inline-block; 
+        width: auto;
+        min-height: 40px;
+        margin-left: 5px;
+        margin-right: 5px;
+        margin-bottom: 15px; /* 縦のスペースを少し増やす */
+    }
+    
+    /* 問題文と見出しを左寄せに戻す */
+    #quiz-container h2, 
+    #quiz-container p strong {
+        text-align: left;
+    }
+}

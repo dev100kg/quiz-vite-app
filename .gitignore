@@ -1,0 +1,38 @@
+# dependencies (依存関係)
+/node_modules
+/dist
+
+# build output (Viteのビルド成果物)
+# Viteのデフォルトの出力ディレクトリ
+/dist
+/out
+/build
+
+# logs (ログ)
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+/pnpm-debug.log*
+/pnpm-lock.yaml
+
+# OS generated files (OS生成ファイル)
+.DS_Store
+Thumbs.db
+
+# sensitive environment variables (機密情報 - 最も重要!)
+# Firebase設定を含む環境変数ファイル
+.env
+.env.local
+
+# IDE and Editor files (エディタ・IDE設定ファイル)
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
