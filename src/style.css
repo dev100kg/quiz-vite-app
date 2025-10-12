@@ -1,4 +1,5 @@
 /* style.css */
+/** biome-ignore-all lint/complexity/noImportantStyles: <explanation> */
 
 /*
 =========================================================
@@ -6,81 +7,156 @@
 =========================================================
 */
 
-/* 基本フォントサイズを大きくし、モバイルでの視認性を向上 */
-body {
-    font-family: 'Noto Sans JP', 'Roboto', sans-serif; 
-    
-    padding: 10px; 
-    font-size: 1.6rem;
-    margin: 0;
+/* アクセントカラーを定義 */
+:root {
+	--corporate-color: #92cb6e; /* 明るいグリーン */
+	--corporate-dark: #79a759; /* ダークなグリーン (ホバー用) */
+	--background-light: #f5f8fa; /* 淡いグレーの背景 */
+	--shadow-soft: 0 3px 10px rgba(0, 0, 0, 0.05);
 }
 
-/* Milligramのコンテナの最大幅を解除し、モバイルでは画面幅いっぱいに使う */
+/* 基本フォントサイズを大きくし、モバイルでの視認性を向上 */
+body {
+	font-family: "Noto Sans JP", "Roboto", sans-serif;
+
+	/* ⭐ 修正: クリーンな淡い背景色に変更 ⭐ */
+	background: var(--background-light);
+	background-attachment: fixed;
+
+	padding: 10px;
+	font-size: 1.6rem;
+	margin: 0;
+}
+
+/* コンテナは透過し、影や角丸は #quiz-container に任せる */
 .container {
-    width: 95% !important; 
-    max-width: 100% !important; 
+	width: 95%;
+	max-width: 100%;
+	border-radius: 12px;
+	padding: 20px 15px; /* 外側の余白として機能 */
+	margin: 20px auto;
+}
+
+/* ⭐ 修正: ユーザーIDの要素（#status-message）のスタイルをクリーンに ⭐ */
+#status-message {
+	/* #quiz-container のパディングを打ち消し、幅を広げる */
+	margin: -15px -15px 15px -15px !important;
+	padding: 10px 15px;
+
+	background-color: #fcfcfc; /* ほぼ白の背景でヘッダー感を出す */
+	font-size: 1.4rem;
+	color: #666;
+	border-radius: 8px 8px 0 0; /* 上部だけ角丸 */
+	text-align: left;
+	border-bottom: 1px solid #eee; /* 薄い区切り線 */
+}
+
+/* ⭐ 問題コンテナに白い背景、影、角丸を追加し、カード化する ⭐ */
+#quiz-container {
+	background-color: white;
+	/* ⭐ 修正: ソフトな影に変更 ⭐ */
+	box-shadow: var(--shadow-soft);
+	padding: 15px;
+	border-radius: 8px;
+	margin-bottom: 20px;
 }
 
 /* タイトルを中央寄せ */
 h1 {
-    text-align: center;
-    font-size: 2.8rem;
-    margin-bottom: 10px;
+	text-align: center;
+	font-size: 2.8rem;
+	margin-bottom: 10px;
 }
 
 /* === タップしやすいボタンと問題文 === */
 
-/* 問題文（question）を大きく目立たせる */
-#quiz-container h2 {
-    font-size: 2.4rem;
-    text-align: center;
-}
-#quiz-container p strong {
-    display: block;
-    font-size: 2rem; /* 問題文のサイズ */
-    line-height: 1.5;
-    margin-bottom: 20px;
+/* 問題番号 (Q.4/10など) のサイズを調整 */
+#quiz-container h3,
+#quiz-container p:first-child {
+	font-size: 1.8rem;
+	text-align: center;
+	margin-bottom: 15px;
+	font-weight: 700;
 }
 
-/* ボタンをブロック要素（縦並び）にし、タップしやすい高さと全幅を設定 */
-.option-button {
-    display: block;
-    width: 100%; /* 全幅に広げる */
-    min-height: 55px; /* タップしやすい最低限の高さ */
-    padding: 15px 10px;
-    margin-bottom: 12px;
-    font-size: 1.1em;
-    line-height: 1;
-    white-space: normal; /* テキストの折り返しを許可 */
+/* 問題文（question）を大きく目立たせる */
+#quiz-container h2 {
+	font-size: 2.4rem;
+	text-align: center;
+	font-weight: 700;
+}
+#quiz-container p strong {
+	display: block;
+	font-size: 2rem;
+	line-height: 1.5;
+	margin-bottom: 20px;
+}
+
+/* ⭐ 全てのボタンのスタイルをコーポレートカラー（グリーン）で統一 ⭐ */
+button {
+	/* デザインを統一 */
+	background-color: var(--corporate-color) !important;
+	color: white !important;
+	border-color: var(--corporate-color) !important;
+	border-radius: 6px !important;
+	box-shadow: 0 3px 6px rgba(146, 203, 110, 0.3) !important; /* グリーンの影 */
+
+	/* 文字サイズと中央寄せを統一 */
+	font-size: 1.8rem !important;
+	line-height: normal !important;
+	padding: 1rem !important;
+	height: auto !important;
+
+	font-weight: 700 !important;
+
+	/* Flexboxでテキストを上下中央に揃える（Milligram対策） */
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+}
+
+/* ホバー時の効果を追加（デスクトップでの体験向上） */
+button:hover {
+	background-color: var(--corporate-dark) !important;
+	border-color: var(--corporate-dark) !important;
+}
+
+/* 選択肢ボタンの縦並びと隙間 */
+#options-list {
+	/* Milligramへの対策: モバイル・デスクトップ共通で縦一列を強制 */
+	display: flex !important;
+	flex-direction: column !important;
+	gap: 15px;
+	margin-top: 30px;
 }
 
 /* 正解/不正解のフィードバックを目立たせる */
 #feedback {
-    font-size: 2rem;
-    text-align: center;
-    margin: 20px 0;
-    padding: 10px;
+	font-size: 2rem;
+	text-align: center;
+	margin: 20px 0;
+	padding: 10px;
 }
 
-/* ランキング/結果画面のボタンを全幅にする */
+/* ランキング/結果画面のボタン（すでに button タグのスタイルでカバーされています） */
 #result-container button {
-    width: 100%;
-    margin-top: 20px;
-    min-height: 50px;
+	width: 100%;
+	margin-top: 20px;
+	min-height: 50px;
 }
 
 /* === ランキングテーブルの調整 === */
 table {
-    font-size: 1.4rem;
-    /* MilligramのテーブルはレスポンシブなのでこれだけでOK */
+	font-size: 1.4rem;
 }
-table th, table td {
-    padding: 10px 5px;
-    text-align: left;
+table th,
+table td {
+	padding: 10px 5px;
+	text-align: left;
 }
 /* スコアの列を太字で強調 */
 table td:nth-child(2) strong {
-    font-size: 1.1em;
+	font-size: 1.1em;
 }
 
 /*
@@ -88,26 +164,23 @@ table td:nth-child(2) strong {
 デスクトップ/タブレット向けの調整 (40.0rem = 640px以上)
 =========================================================
 */
-@media (min-width: 40.0rem) {
-    /* コンテナ幅を制限し、中央に寄せることで間延びを防ぐ */
-    .container {
-        width: 80% !important; 
-        max-width: 96.0rem !important; /* 標準的なデスクトップの最大幅に設定 */
-    }
-    
-    /* ボタンをインライン要素に戻し、横に並べる */
-    .option-button {
-        display: inline-block; 
-        width: auto;
-        min-height: 40px;
-        margin-left: 5px;
-        margin-right: 5px;
-        margin-bottom: 15px; /* 縦のスペースを少し増やす */
-    }
-    
-    /* 問題文と見出しを左寄せに戻す */
-    #quiz-container h2, 
-    #quiz-container p strong {
-        text-align: left;
-    }
+
+@media (min-width: 40rem) {
+	/* コンテナ幅を制限し、中央に寄せることで間延びを防ぐ */
+	.container {
+		width: 80%;
+		max-width: 900px;
+		margin: 40px auto;
+	}
+
+	/* デスクトップでの #quiz-container の調整 */
+	#quiz-container {
+		padding: 25px; /* デスクトップではもう少し広めのパディング */
+	}
+
+	/* 問題文と見出しを左寄せに戻す */
+	#quiz-container h2,
+	#quiz-container p strong {
+		text-align: left;
+	}
 }

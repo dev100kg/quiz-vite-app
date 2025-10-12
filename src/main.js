@@ -1,3 +1,4 @@
+import './style.css'
 import { initializeApp } from 'firebase/app'
 import { getAuth, signInAnonymously } from 'firebase/auth'
 import {
@@ -52,15 +53,16 @@ async function initializeAppAndLoadQuiz() {
     const userCredential = await signInAnonymously(auth)
     currentUid = userCredential.user.uid
 
+    // ⭐ 修正箇所: ユーザーIDの要素を #quiz-container の内部に移動 ⭐
     appContainer.innerHTML = `
-            <div class="container">
+        <div class="container">
+            <div id="quiz-container">
                 <p id="status-message">ユーザーID ${currentUid.substring(0, 8)}...</p>
-                <div id="quiz-container">
-                    <p>クイズデータ準備中...</p>
-                </div>
-                <div id="result-container" style="display:none;"></div>
+                <p>クイズデータ準備中...</p>
             </div>
-        `
+            <div id="result-container" style="display:none;"></div>
+        </div>
+    `
 
     await loadQuizzes()
   } catch (error) {
@@ -89,6 +91,7 @@ async function loadQuizzes() {
       return
     }
 
+    // 10問をランダムに選択
     quizzesData = allQuizzes.sort(() => 0.5 - Math.random()).slice(0, 10)
 
     startQuiz()
@@ -111,34 +114,37 @@ function displayQuiz() {
   const quizContainer = document.querySelector('#quiz-container')
 
   if (currentQuizIndex >= quizzesData.length) {
-    // 全問終了
     showResults()
     return
   }
 
   const quiz = quizzesData[currentQuizIndex]
 
+  // 問題表示時にユーザーIDメッセージを維持
+  const userIdMessage = document.querySelector('#status-message')
+    ? document.querySelector('#status-message').outerHTML
+    : ''
+
   quizContainer.innerHTML = `
-        <div class="row">
-            <div class="column">
-                <h2>Q.${currentQuizIndex + 1} / ${quizzesData.length}</h2>
-                <p><strong>${quiz.question}</strong></p>
-                <div id="options-list">
-                    ${quiz.options
-                      .map(
-                        option =>
-                          // 選択肢ボタン
-                          `<button class="option-button button-outline" 
-                                onclick="window.checkAnswer('${option.replace(/'/g, "\\'")}')">
-                           ${option}
-                       </button>`,
-                      )
-                      .join('')}
-                </div>
-                <div id="feedback"></div> 
-                <p><small>正解数: ${correctAnswers}</small></p>
-            </div>
+        ${userIdMessage} 
+        <h2>Q.${currentQuizIndex + 1} / ${quizzesData.length}</h2>
+        <p><strong>${quiz.question}</strong></p>
+        
+        <div id="options-list"> 
+            ${quiz.options
+              .map(
+                option =>
+                  // ボタンに column-12 を適用
+                  `<button class="option-button button-outline column-12" 
+                      onclick="window.checkAnswer('${option.replace(/'/g, "\\'")}')">
+                    ${option}
+                   </button>`,
+              )
+              .join('')}
         </div>
+        
+        <div id="feedback"></div> 
+        <p><small>正解数: ${correctAnswers}</small></p>
     `
 }
 
@@ -192,7 +198,13 @@ async function showResults() {
   const resultContainer = document.querySelector('#result-container')
   const finalScore = correctAnswers * 10
 
+  // 結果表示時もユーザーIDメッセージを維持
+  const userIdMessage = document.querySelector('#status-message')
+    ? document.querySelector('#status-message').outerHTML
+    : ''
+
   quizContainer.innerHTML = `
+        ${userIdMessage}
         <h2>クイズ終了！</h2>
         <p>最終スコア: ${finalScore} 点</p>
         <p>スコアをデータベースに登録しています...</p>
@@ -221,7 +233,13 @@ async function showResults() {
 // =========================================================
 window.loadRanking = async () => {
   const quizContainer = document.querySelector('#quiz-container')
-  quizContainer.innerHTML = '<h2>ランキングを読み込み中...</h2>'
+
+  // ランキング表示時もユーザーIDメッセージを維持
+  const userIdMessage = document.querySelector('#status-message')
+    ? document.querySelector('#status-message').outerHTML
+    : ''
+
+  quizContainer.innerHTML = `${userIdMessage}<h2>ランキングを読み込み中...</h2>`
 
   try {
     const scoresRef = collection(db, 'scores')
@@ -230,6 +248,7 @@ window.loadRanking = async () => {
     const querySnapshot = await getDocs(q)
 
     let rankingHTML = `
+            ${userIdMessage}
             <div class="row">
                 <div class="column">
                     <h3>🏆 上位 10 名のスコア</h3>
@@ -242,7 +261,7 @@ window.loadRanking = async () => {
                             </tr>
                         </thead>
                         <tbody>
-        `
+    `
     let rank = 1
     querySnapshot.forEach(doc => {
       const data = doc.data()
