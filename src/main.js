@@ -36,6 +36,15 @@ let quizzesData = [] // 読み込んだクイズデータ（出題用）
 let currentQuizIndex = 0 // 現在の出題インデックス
 let correctAnswers = 0 // 正解数
 
+// ⭐ 追加: 配列をランダムにシャッフルするヘルパー関数 (Fisher-Yates) ⭐
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[array[i], array[j]] = [array[j], array[i]]
+  }
+  return array
+}
+
 // =========================================================
 // 2. アプリの初期化と認証
 // =========================================================
@@ -53,7 +62,7 @@ async function initializeAppAndLoadQuiz() {
     const userCredential = await signInAnonymously(auth)
     currentUid = userCredential.user.uid
 
-    // ⭐ 修正箇所: ユーザーIDの要素を #quiz-container の内部に移動 ⭐
+    // ユーザーIDの要素を #quiz-container の内部に移動
     appContainer.innerHTML = `
         <div class="container">
             <div id="quiz-container">
@@ -125,13 +134,16 @@ function displayQuiz() {
     ? document.querySelector('#status-message').outerHTML
     : ''
 
+  // ⭐ 修正: オプション配列をシャッフルする ⭐
+  const shuffledOptions = shuffleArray([...quiz.options]) // 元の配列を破壊しないようコピーしてからシャッフル
+
   quizContainer.innerHTML = `
         ${userIdMessage} 
         <h2>Q.${currentQuizIndex + 1} / ${quizzesData.length}</h2>
         <p><strong>${quiz.question}</strong></p>
         
         <div id="options-list"> 
-            ${quiz.options
+            ${shuffledOptions // ⭐ シャッフルされた配列を使用 ⭐
               .map(
                 option =>
                   // ボタンに column-12 を適用
