@@ -15,7 +15,6 @@ import {
 // =========================================================
 // 1. 設定と初期化 (環境変数から読み込み)
 // =========================================================
-// 🚨 修正箇所: .envファイルからVITE_プレフィックスの環境変数を読み込む
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -32,11 +31,12 @@ const db = getFirestore(app)
 
 // グローバルな状態管理変数
 let currentUid = null // 匿名ユーザーの UID
+let userName = '' // ユーザー名を保持 (初期値)
 let quizzesData = [] // 読み込んだクイズデータ（出題用）
 let currentQuizIndex = 0 // 現在の出題インデックス
 let correctAnswers = 0 // 正解数
 
-// ⭐ 追加: 配列をランダムにシャッフルするヘルパー関数 (Fisher-Yates) ⭐
+// 配列をランダムにシャッフルするヘルパー関数 (Fisher-Yates)
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
@@ -48,6 +48,36 @@ function shuffleArray(array) {
 // =========================================================
 // 2. アプリの初期化と認証
 // =========================================================
+
+// ユーザー名入力フォームを表示する関数
+function displayUserNameInput() {
+  const quizContainer = document.querySelector('#quiz-container')
+
+  // #quiz-container の中身を入力フォームで上書きする
+  // userNameには localStorage から読み込んだ名前か初期値が入っている
+  quizContainer.innerHTML = `
+        <h1>ニックネームを設定</h1>
+        <p>このクイズで利用する名前（ランキングに表示されます）を入力してください。</p>
+        <div class="row">
+            <input type="text" id="username-input" class="column column-8" placeholder="あなたの名前 (例: クイズ王)" maxlength="15" value="${userName}">
+            <button id="start-button" class="button button-primary column column-4" onclick="window.setUserNameAndStart()">開始</button>
+        </div>
+    `
+
+  // エンターキーで開始できるようにイベントを追加
+  document.getElementById('username-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      window.setUserNameAndStart()
+    }
+  })
+
+  // 結果コンテナを隠す
+  const resultContainer = document.querySelector('#result-container')
+  if (resultContainer) {
+    resultContainer.style.display = 'none'
+  }
+}
+
 async function initializeAppAndLoadQuiz() {
   const appContainer = document.querySelector('#app')
 
@@ -62,23 +92,58 @@ async function initializeAppAndLoadQuiz() {
     const userCredential = await signInAnonymously(auth)
     currentUid = userCredential.user.uid
 
-    // ユーザーIDの要素を #quiz-container の内部に移動
+    // localStorageから以前保存したユーザー名を読み込む (初期値として利用)
+    const savedUserName = localStorage.getItem('quizUserName')
+    if (savedUserName) {
+      userName = savedUserName
+    }
+
+    // 基本構造を DOM に書き込む
     appContainer.innerHTML = `
         <div class="container">
             <div id="quiz-container">
-                <p id="status-message">ユーザーID ${currentUid.substring(0, 8)}...</p>
-                <p>クイズデータ準備中...</p>
+                <p id="status-message">ユーザー名: ${userName}</p>
+                <p>処理中...</p>
             </div>
             <div id="result-container" style="display:none;"></div>
         </div>
     `
 
-    await loadQuizzes()
+    // 認証完了後、必ず名前入力画面を表示する
+    displayUserNameInput()
   } catch (error) {
     console.error('アプリ初期化エラー:', error)
     appContainer.innerHTML = `<p style="color:red;">エラー: アプリの起動に失敗しました (${error.message})</p>`
   }
 }
+
+// ユーザー名を設定し、クイズロードに進む関数
+window.setUserNameAndStart = () => {
+  const inputElement = document.getElementById('username-input')
+  let inputName = inputElement.value.trim()
+
+  // 空欄の場合はデフォルト名を使用
+  if (inputName === '') {
+    inputName = `匿名ユーザー ${currentUid.substring(0, 4)}`
+  }
+
+  // ユーザー名をグローバル変数に保存
+  userName = inputName
+
+  // ユーザー名を localStorage に保存
+  localStorage.setItem('quizUserName', userName)
+
+  // UIを初期化し、クイズロードに進む
+  const quizContainer = document.querySelector('#quiz-container')
+  quizContainer.innerHTML = `
+        <p id="status-message">ユーザー名: ${userName}</p>
+        <p>クイズデータ準備中...</p>
+    `
+
+  loadQuizzes()
+}
+
+// ⭐ 削除: window.resetUserName 関数を削除します。
 
 // =========================================================
 // 3. クイズデータの読み込みと出題開始
@@ -129,12 +194,10 @@ function displayQuiz() {
 
   const quiz = quizzesData[currentQuizIndex]
 
-  // 問題表示時にユーザーIDメッセージを維持
-  const userIdMessage = document.querySelector('#status-message')
-    ? document.querySelector('#status-message').outerHTML
-    : ''
+  // ユーザー名を表示するテンプレート
+  const userIdMessage = `<p id="status-message">ユーザー名: ${userName}</p>`
 
-  // ⭐ 修正: オプション配列をシャッフルする ⭐
+  // オプション配列をシャッフルする
   const shuffledOptions = shuffleArray([...quiz.options]) // 元の配列を破壊しないようコピーしてからシャッフル
 
   quizContainer.innerHTML = `
@@ -143,7 +206,7 @@ function displayQuiz() {
         <p><strong>${quiz.question}</strong></p>
         
         <div id="options-list"> 
-            ${shuffledOptions // ⭐ シャッフルされた配列を使用 ⭐
+            ${shuffledOptions
               .map(
                 option =>
                   // ボタンに column-12 を適用
@@ -173,10 +236,13 @@ window.checkAnswer = selectedOption => {
 
   let feedbackHTML = ''
 
+  // CSS変数を使って正解メッセージの色をコーポレートカラーの濃い色にする
+  const correctColor = 'var(--corporate-dark)'
+
   if (selectedOption === quiz.answer) {
     // ✅ 正解の場合
     correctAnswers++
-    feedbackHTML = `<p style="color: green; font-weight: bold; font-size: 2rem; text-align: center;">✅ 正解です！</p>`
+    feedbackHTML = `<p style="color: ${correctColor}; font-weight: bold; font-size: 2rem; text-align: center;">✅ 正解です！</p>`
   } else {
     // ❌ 不正解の場合
     feedbackHTML = `
@@ -210,10 +276,8 @@ async function showResults() {
   const resultContainer = document.querySelector('#result-container')
   const finalScore = correctAnswers * 10
 
-  // 結果表示時もユーザーIDメッセージを維持
-  const userIdMessage = document.querySelector('#status-message')
-    ? document.querySelector('#status-message').outerHTML
-    : ''
+  // 結果表示時もユーザー名メッセージを維持
+  const userIdMessage = `<p id="status-message">ユーザー名: ${userName}</p>`
 
   quizContainer.innerHTML = `
         ${userIdMessage}
@@ -226,11 +290,13 @@ async function showResults() {
     const scoresCollection = collection(db, 'scores')
     await addDoc(scoresCollection, {
       anonymousUid: currentUid,
+      // ユーザー名を保存
+      userName: userName,
       score: finalScore,
       timestamp: serverTimestamp(),
     })
 
-    quizContainer.innerHTML += `<p style="color:green;">✅ スコア登録が完了しました！</p>`
+    quizContainer.innerHTML += `<p style="color:var(--corporate-dark);">✅ スコア登録が完了しました！</p>`
 
     resultContainer.innerHTML = `<button class="button-primary" onclick="window.loadRanking()">ランキングを見る</button>`
     resultContainer.style.display = 'block'
@@ -246,10 +312,8 @@ async function showResults() {
 window.loadRanking = async () => {
   const quizContainer = document.querySelector('#quiz-container')
 
-  // ランキング表示時もユーザーIDメッセージを維持
-  const userIdMessage = document.querySelector('#status-message')
-    ? document.querySelector('#status-message').outerHTML
-    : ''
+  // ランキング表示時もユーザー名メッセージを維持
+  const userIdMessage = `<p id="status-message">ユーザー名: ${userName}</p>`
 
   quizContainer.innerHTML = `${userIdMessage}<h2>ランキングを読み込み中...</h2>`
 
@@ -269,7 +333,7 @@ window.loadRanking = async () => {
                             <tr>
                                 <th>順位</th>
                                 <th>スコア</th>
-                                <th>ユーザーID</th>
+                                <th>ユーザー名</th> 
                             </tr>
                         </thead>
                         <tbody>
@@ -281,7 +345,7 @@ window.loadRanking = async () => {
                 <tr>
                     <td>#${rank++}</td>
                     <td><strong>${data.score} 点</strong></td>
-                    <td>${data.anonymousUid.substring(0, 8)}...</td>
+                    <td>${data.userName || `${data.anonymousUid.substring(0, 8)}...`}</td> 
                 </tr>
             `
     })

@@ -19,7 +19,7 @@
 body {
 	font-family: "Noto Sans JP", "Roboto", sans-serif;
 
-	/* ⭐ 修正: クリーンな淡い背景色に変更 ⭐ */
+	/* クリーンな淡い背景色に変更 */
 	background: var(--background-light);
 	background-attachment: fixed;
 
@@ -37,7 +37,7 @@ body {
 	margin: 20px auto;
 }
 
-/* ⭐ 修正: ユーザーIDの要素（#status-message）のスタイルをクリーンに ⭐ */
+/* ユーザーIDの要素（#status-message）のスタイルをクリーンに */
 #status-message {
 	/* #quiz-container のパディングを打ち消し、幅を広げる */
 	margin: -15px -15px 15px -15px !important;
@@ -51,10 +51,10 @@ body {
 	border-bottom: 1px solid #eee; /* 薄い区切り線 */
 }
 
-/* ⭐ 問題コンテナに白い背景、影、角丸を追加し、カード化する ⭐ */
+/* 問題コンテナに白い背景、影、角丸を追加し、カード化する */
 #quiz-container {
 	background-color: white;
-	/* ⭐ 修正: ソフトな影に変更 ⭐ */
+	/* ソフトな影に変更 */
 	box-shadow: var(--shadow-soft);
 	padding: 15px;
 	border-radius: 8px;
@@ -92,7 +92,7 @@ h1 {
 	margin-bottom: 20px;
 }
 
-/* ⭐ 全てのボタンのスタイルをコーポレートカラー（グリーン）で統一 ⭐ */
+/* 全てのボタンのスタイルをコーポレートカラー（グリーン）で統一 */
 button {
 	/* デザインを統一 */
 	background-color: var(--corporate-color) !important;
@@ -107,12 +107,18 @@ button {
 	padding: 1rem !important;
 	height: auto !important;
 
+	/* ⭐ 修正: 最小高さを指定して、paddingが不十分な場合も統一された高さを確保 ⭐ */
+	min-height: 55px !important;
+
 	font-weight: 700 !important;
 
 	/* Flexboxでテキストを上下中央に揃える（Milligram対策） */
 	display: flex !important;
 	align-items: center !important;
 	justify-content: center !important;
+
+	/* ニックネーム入力画面のボタンのために、幅100%をデフォルトにする */
+	width: 100% !important;
 }
 
 /* ホバー時の効果を追加（デスクトップでの体験向上） */
@@ -138,11 +144,11 @@ button:hover {
 	padding: 10px;
 }
 
-/* ランキング/結果画面のボタン（すでに button タグのスタイルでカバーされています） */
+/* ランキング/結果画面のボタン */
 #result-container button {
 	width: 100%;
 	margin-top: 20px;
-	min-height: 50px;
+	/* min-heightはグローバルな button 設定でカバーされる */
 }
 
 /* === ランキングテーブルの調整 === */
@@ -157,6 +163,32 @@ table td {
 /* スコアの列を太字で強調 */
 table td:nth-child(2) strong {
 	font-size: 1.1em;
+}
+
+/* ⭐⭐⭐ ニックネーム入力画面の縦並び修正 ⭐⭐⭐ */
+/* Milligramのrowクラスを上書きし、縦並びを強制 */
+.row {
+	display: flex !important;
+	flex-direction: column !important;
+	gap: 15px; /* 入力欄とボタンの間の隙間 */
+}
+
+/* 入力欄（input）とボタンが100%幅になるように調整 */
+.row input[type="text"] {
+	width: 100% !important;
+	margin-left: 0 !important;
+
+	/* ⭐ 修正: ボタンと同じ高さを確保するために、paddingとmin-heightを調整 ⭐ */
+	padding: 1rem 1rem !important;
+	height: auto !important;
+	min-height: 55px !important; /* ボタンと同じ最小高さを設定 */
+	font-size: 1.8rem !important;
+}
+
+/* Milligramのcolumnクラスに指定されたパディングをリセット（見た目をすっきりさせるため） */
+.row .column {
+	padding: 0 !important;
+	margin: 0 !important;
 }
 
 /*
@@ -182,5 +214,10 @@ table td:nth-child(2) strong {
 	#quiz-container h2,
 	#quiz-container p strong {
 		text-align: left;
+	}
+
+	/* デスクトップでもニックネーム入力欄は縦並びを維持 */
+	.row {
+		flex-direction: column !important;
 	}
 }
